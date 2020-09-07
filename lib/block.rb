@@ -209,6 +209,6 @@ class Block
   end
 
   def merge (others)
-    # Implement.
+    self.class.merge([self] + others)
   end
 end
