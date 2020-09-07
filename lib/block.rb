@@ -137,11 +137,13 @@ class Block
   # d = Block.new(80, 120) 40-200 
   # c = Block.new(40, 80)
   # b = Block.new(10, 20)
-  def addition(a, b)
-    range = a.top..a.bottom
-    return [a, b] if !range.cover?(b.top) && !range.cover?(b.bottom)
-    new_top = range.cover?(b.top) ? a.top : b.top
-    new_bottom = range.cover?(b.bottom) ? a.bottom : b.bottom
+  def addition(block_a, block_b)
+    block_a_range = block_a.top..block_a.bottom
+    if !block_a_range.cover?(block_b.top) && !block_a_range.cover?(block_b.bottom)
+      return [block_a, block_b] 
+    end
+    new_top = block_a_range.cover?(block_b.top) ? block_a.top : block_b.top
+    new_bottom = block_a_range.cover?(block_b.bottom) ? block_a.bottom : block_b.bottom
     [Block.new(new_top, new_bottom)]
   end
 
@@ -152,12 +154,8 @@ class Block
     others = others.sort_by(&:top)
     increment = 0
     blocks_count.times.each do |index|
-      first, second = others.slice!(increment + index, 2)
-      if second
-        result = addition(first, second)
-      else
-        result = [first]
-      end
+      block_a, block_b = others.slice!(increment + index, 2)
+      result = addition(block_a, block_b)
       others.insert(index + increment, *result)
       increment += (result.length == 2 ?  0 : -1)
     end
@@ -167,16 +165,20 @@ class Block
   
   # Return the result of subtracting the other Block (or Blocks) from self.
 
-  def subtration(a, b)
-    range = a.top..a.bottom
-    return [] if (b.top..b.bottom).cover?(range)
-    return [a] if !range.cover?(b.top+1) && !range.cover?(b.bottom-1)
+  def subtration(other)
+    block_a_range = top..bottom
     blocks = []
-    if a.top < b.top && a.bottom > b.top
-      blocks << Block.new(a.top, b.top)
+    return blocks if (other.top..other.bottom).cover?(block_a_range)
+
+    if !block_a_range.cover?(other.top + 1) && !block_a_range.cover?(other.bottom - 1)
+      return [self] 
     end
-    if a.bottom > b.bottom
-      blocks << Block.new(b.bottom, a.bottom)
+
+    if top < other.top && bottom > other.top
+      blocks << Block.new(top, other.top)
+    end
+    if bottom > other.bottom
+      blocks << Block.new(other.bottom, bottom)
     end
     blocks
   end
@@ -185,7 +187,7 @@ class Block
     others = [*other]
     result = [self]
     others.each do |block|
-      result = result.flat_map { |r| subtration(r, block) }
+      result = result.each_with_object(block).flat_map(&:subtration)
     end
     result
   end
@@ -209,6 +211,6 @@ class Block
   end
 
   def merge (others)
-    self.class.merge([self] + others)
+    self.class.merge([self, *others])
   end
 end
