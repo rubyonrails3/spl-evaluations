@@ -133,9 +133,37 @@ class Block
   
   # Return the result of adding the other Block (or Blocks) to self.
 
-  def add (other)
-    # Implement.
+  # a = Block.new(100, 200) [a, b, c]
+  # d = Block.new(80, 120) 40-200 
+  # c = Block.new(40, 80)
+  # b = Block.new(10, 20)
+  def addition(a, b)
+    range = a.top..a.bottom
+    return [a, b] if !range.cover?(b.top) && !range.cover?(b.bottom)
+    new_top = range.cover?(b.top) ? a.top : b.top
+    new_bottom = range.cover?(b.bottom) ? a.bottom : b.bottom
+    [Block.new(new_top, new_bottom)]
   end
+
+  def add (other)
+    others = [*other]
+    blocks_count = others.length
+    others << self
+    others = others.sort_by(&:top)
+    increment = 0
+    blocks_count.times.each do |index|
+      first, second = others.slice!(increment + index, 2)
+      if second
+        result = addition(first, second)
+      else
+        result = [first]
+      end
+      others.insert(index + increment, *result)
+      increment += (result.length == 2 ?  0 : -1)
+    end
+    others
+  end
+
   
   # Return the result of subtracting the other Block (or Blocks) from self.
 
