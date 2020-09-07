@@ -167,7 +167,7 @@ class Block
   
   # Return the result of subtracting the other Block (or Blocks) from self.
 
-  def substration(a, b)
+  def subtration(a, b)
     range = a.top..a.bottom
     return [] if (b.top..b.bottom).cover?(range)
     return [a] if !range.cover?(b.top+1) && !range.cover?(b.bottom-1)
@@ -182,8 +182,14 @@ class Block
   end
 
   def subtract (other)
-    substration(self, other)
+    others = [*other]
+    result = [self]
+    others.each do |block|
+      result = result.flat_map { |r| subtration(r, block) }
+    end
+    result
   end
+
 
 
   alias :- :subtract
