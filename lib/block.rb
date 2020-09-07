@@ -167,9 +167,24 @@ class Block
   
   # Return the result of subtracting the other Block (or Blocks) from self.
 
-  def subtract (other)
-    # Implement.
+  def substration(a, b)
+    range = a.top..a.bottom
+    return [] if (b.top..b.bottom).cover?(range)
+    return [a] if !range.cover?(b.top+1) && !range.cover?(b.bottom-1)
+    blocks = []
+    if a.top < b.top && a.bottom > b.top
+      blocks << Block.new(a.top, b.top)
+    end
+    if a.bottom > b.bottom
+      blocks << Block.new(b.bottom, a.bottom)
+    end
+    blocks
   end
+
+  def subtract (other)
+    substration(self, other)
+  end
+
 
   alias :- :subtract
 
